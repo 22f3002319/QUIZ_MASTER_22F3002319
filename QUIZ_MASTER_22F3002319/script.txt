@@ -1,0 +1,63 @@
+
+
+TERMINAL 1: START REDIS SERVER
+==============================
+# Start Redis server (required for Celery and caching)
+redis-server
+
+# Alternative if Redis is not in PATH:
+# Navigate to Redis installation directory and run:
+# redis-server.exe
+
+TERMINAL 2: START MAILHOG (EMAIL TESTING)
+=========================================
+# Start Mailhog for email testing and debugging
+mailhog.exe
+
+# Alternative if Mailhog is not in PATH:
+# Navigate to Mailhog directory and run:
+# ./MailHog.exe
+
+# Access Mailhog web interface at: http://localhost:8025
+
+TERMINAL 3: ACTIVATE VIRTUAL ENVIRONMENT & START FLASK APP
+=========================================================
+# Navigate to project directory
+cd C:\QUIZ_MASTER_22F3002319
+
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Start Flask application
+python app.py
+
+# Access the application at: http://localhost:5000
+
+TERMINAL 4: START CELERY WORKER (BACKGROUND TASKS)
+==================================================
+# Navigate to project directory
+cd C:\QUIZ_MASTER_22F3002319
+
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Start Celery worker for background email tasks
+python -m celery -A celery_config worker --loglevel=info --pool=solo
+
+# Alternative with more verbose logging:
+python -m celery -A celery_config worker --loglevel=debug --pool=solo
+
+TERMINAL 5: START CELERY BEAT (OPTIONAL - SCHEDULED TASKS)
+=========================================================
+# Navigate to project directory
+cd C:\QUIZ_MASTER_22F3002319
+
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Start Celery beat for scheduled tasks (daily reminders, monthly reports)
+python -m celery -A celery_config beat --loglevel=info
+
+# Alternative with scheduler file:
+python -m celery -A celery_config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+

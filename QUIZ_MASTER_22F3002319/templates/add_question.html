@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Add Question - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Include Admin Navigation -->
+    {% include 'includes/admin_nav.html' %}
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Add Question to {{ quiz.remarks }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_question', quiz_id=quiz.id) }}">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        <label class="form-label">Question Statement:</label>
+                        {{ form.question_statement(class="form-control") }}
+                        {% if form.question_statement.errors %}
+                            {% for error in form.question_statement.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Option 1:</label>
+                        {{ form.option1(class="form-control") }}
+                        {% if form.option1.errors %}
+                            {% for error in form.option1.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Option 2:</label>
+                        {{ form.option2(class="form-control") }}
+                        {% if form.option2.errors %}
+                            {% for error in form.option2.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Option 3:</label>
+                        {{ form.option3(class="form-control") }}
+                        {% if form.option3.errors %}
+                            {% for error in form.option3.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Option 4:</label>
+                        {{ form.option4(class="form-control") }}
+                        {% if form.option4.errors %}
+                            {% for error in form.option4.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correct Option:</label>
+                        {{ form.correct_option(class="form-control") }}
+                        {% if form.correct_option.errors %}
+                            {% for error in form.correct_option.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <a href="{{ url_for('manage_questions', quiz_id=quiz.id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Add Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

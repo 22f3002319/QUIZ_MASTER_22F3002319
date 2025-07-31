@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Available Quizzes - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Include User Navigation -->
+    {% include 'includes/user_nav.html' %}
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Available Quizzes</h5>
+            </div>
+            <div class="card-body">
+                {% if quizzes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Chapter</th>
+                                    <th>Quiz Name</th>
+                                    <th>Questions</th>
+                                    <th>Time Limit</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quiz in quizzes %}
+                                    <tr>
+                                        <td>{{ quiz.chapter.subject.name }}</td>
+                                        <td>{{ quiz.chapter.name }}</td>
+                                        <td>{{ quiz.name }}</td>
+                                        <td>{{ quiz.questions|length }}</td>
+                                        <td>{{ quiz.time_limit }} minutes</td>
+                                        <td>
+                                            <a href="{{ url_for('start_quiz', quiz_id=quiz.id) }}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-play me-1"></i> Start Quiz
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No quizzes available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

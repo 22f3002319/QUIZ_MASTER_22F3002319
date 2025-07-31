@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Quiz Master{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css', v=1) }}">
+{% endblock %}
+
+{% block content %}
+<div id="app" class="container-fluid">
+    <!-- Include Admin Navigation -->
+    {% include 'includes/admin_nav.html' %}
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Statistics Cards -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ users|length }}</h4>
+                                <p class="card-text">Total Users</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ subjects|length }}</h4>
+                                <p class="card-text">Total Subjects</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-book fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+                                        <div class="col-md-3 mb-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ total_chapters }}</h4>
+                                <p class="card-text">Total Chapters</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-list fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">{{ total_quizzes }}</h4>
+                                <p class="card-text">Total Quizzes</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-question-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Search -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Global Search</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" 
+                                       v-model="searchQuery" 
+                                       @input="performSearch" 
+                                       class="form-control" 
+                                       placeholder="Search users, subjects, chapters, or quizzes...">
+                            </div>
+                            <div class="col-md-4">
+                                <select v-model="searchType" @change="performSearch" class="form-select">
+                                    <option value="all">All</option>
+                                    <option value="users">Users</option>
+                                    <option value="subjects">Subjects</option>
+                                    <option value="chapters">Chapters</option>
+                                    <option value="quizzes">Quizzes</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Search Results -->
+                        <div v-if="searchResults.length > 0" class="mt-3">
+                            <h6>Search Results:</h6>
+                            <div class="list-group">
+                                <div v-for="result in searchResults" :key="result.id" class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">[[ result.name ]]</h6>
+                                            <small class="text-muted">
+                                                <span class="badge bg-primary me-1">[[ result.type ]]</span>
+                                                <span v-if="result.email">[[ result.email ]]</span>
+                                                <span v-if="result.subject">[[ result.subject ]]</span>
+                                                <span v-if="result.chapter">[[ result.chapter ]]</span>
+                                                <span v-if="result.duration">[[ result.duration ]] minutes</span>
+                                            </small>
+                                        </div>
+                                        <a :href="result.url" class="btn btn-sm btn-outline-primary">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab">
+                                    <i class="fas fa-book me-2"></i>Subjects
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="chapters-tab" data-bs-toggle="tab" data-bs-target="#chapters" type="button" role="tab">
+                                    <i class="fas fa-list me-2"></i>Chapters
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
+                                    <i class="fas fa-users me-2"></i>Users
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="adminTabsContent">
+                            <!-- Subjects Tab -->
+                            <div class="tab-pane fade show active" id="subjects" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Manage Subjects</h5>
+                                    <a href="{{ url_for('add_subject') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add Subject
+                                    </a>
+                                </div>
+                                
+                                {% if subjects %}
+                                <div class="row">
+                                    {% for subject in subjects %}
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">{{ subject.name }}</h6>
+                                                <p class="card-text text-muted">{{ subject.description or 'No description' }}</p>
+                                                <p class="card-text">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-list me-1"></i>{{ subject.chapters|length }} chapters
+                                                    </small>
+                                                </p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="btn-group w-100" role="group">
+                                                    <a href="{{ url_for('edit_subject', subject_id=subject.id) }}" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('add_chapter', subject_id=subject.id) }}" class="btn btn-outline-success btn-sm">
+                                                        <i class="fas fa-plus"></i> Chapter
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            onclick="deleteSubject({{ subject.id }}, '{{ subject.name }}')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No subjects found</h5>
+                                    <p class="text-muted">Create your first subject to get started.</p>
+                                    <a href="{{ url_for('add_subject') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add Subject
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Chapters Tab -->
+                            <div class="tab-pane fade" id="chapters" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Manage Chapters</h5>
+                                </div>
+                                
+                                {% set all_chapters = [] %}
+                                {% for subject in subjects %}
+                                    {% for chapter in subject.chapters %}
+                                        {% set _ = all_chapters.append(chapter) %}
+                                    {% endfor %}
+                                {% endfor %}
+                                
+                                {% if all_chapters %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Chapter Name</th>
+                                                <th>Subject</th>
+                                                <th>Description</th>
+                                                <th>Quizzes</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for chapter in all_chapters %}
+                                            <tr>
+                                                <td>{{ chapter.name }}</td>
+                                                <td>{{ chapter.subject.name }}</td>
+                                                <td>{{ chapter.description or 'No description' }}</td>
+                                                <td>{{ chapter.quizzes|length }}</td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ url_for('edit_chapter', chapter_id=chapter.id) }}" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </a>
+                                                        <a href="{{ url_for('add_quiz', chapter_id=chapter.id) }}" class="btn btn-outline-success btn-sm">
+                                                            <i class="fas fa-plus"></i> Quiz
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                onclick="deleteChapter({{ chapter.id }}, '{{ chapter.name }}')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No chapters found</h5>
+                                    <p class="text-muted">Create chapters under subjects to get started.</p>
+                                    <a href="{{ url_for('add_subject') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add Subject First
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Users Tab -->
+                            <div class="tab-pane fade" id="users" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Manage Users</h5>
+                                </div>
+                                
+                                {% if users %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Qualification</th>
+                                                <th>Date of Birth</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for user in users %}
+                                            {% if not user.is_admin %}
+                                            <tr>
+                                                <td>{{ user.full_name }}</td>
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.qualification }}</td>
+                                                <td>{{ user.dob.strftime('%Y-%m-%d') }}</td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                onclick="deleteUser({{ user.id }}, '{{ user.full_name }}')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No users found</h5>
+                                    <p class="text-muted">Users will appear here once they register.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const { createApp } = Vue;
+
+createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        return {
+            searchQuery: '',
+            searchType: 'all',
+            searchResults: [],
+            searchTimeout: null
+        }
+    },
+    methods: {
+        performSearch() {
+            // Clear previous timeout
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+            
+            // Debounce search
+            this.searchTimeout = setTimeout(() => {
+                if (this.searchQuery.length < 2) {
+                    this.searchResults = [];
+                    return;
+                }
+                
+                // Make API call to search endpoint
+                fetch(`/api/search?q=${encodeURIComponent(this.searchQuery)}&type=${this.searchType}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Search error:', data.error);
+                            this.searchResults = [];
+                        } else {
+                            this.searchResults = data.results;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search failed:', error);
+                        this.searchResults = [];
+                    });
+            }, 300);
+        }
+    }
+}).mount('#app');
+
+// Delete functions
+function deleteSubject(subjectId, subjectName) {
+    document.getElementById('deleteMessage').textContent = `Are you sure you want to delete the subject "${subjectName}"? This will also delete all chapters and quizzes under this subject.`;
+    document.getElementById('deleteForm').action = `/delete_subject/${subjectId}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+function deleteUser(userId, userName) {
+    document.getElementById('deleteMessage').textContent = `Are you sure you want to delete the user "${userName}"? This action cannot be undone.`;
+    document.getElementById('deleteForm').action = `/delete_user/${userId}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+function deleteChapter(chapterId, chapterName) {
+    document.getElementById('deleteMessage').textContent = `Are you sure you want to delete the chapter "${chapterName}"? This will also delete all quizzes under this chapter.`;
+    document.getElementById('deleteForm').action = `/delete_chapter/${chapterId}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}

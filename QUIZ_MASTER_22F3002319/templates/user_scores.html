@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}My Scores - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Include User Navigation -->
+    {% include 'includes/user_nav.html' %}
+
+    <!-- Scores Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Quiz Performance</h5>
+                    <span class="badge bg-primary">Total Attempts: {{ attempts|length }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Quiz</th>
+                                    <th>Subject</th>
+                                    <th>Chapter</th>
+                                    <th>Date Attempted</th>
+                                    <th>Score</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in attempts %}
+                                <tr>
+                                    <td>{{ attempt.quiz.remarks }}</td>
+                                    <td>{{ attempt.quiz.chapter.subject.name }}</td>
+                                    <td>{{ attempt.quiz.chapter.name }}</td>
+                                    <td>{{ attempt.attempt_date.strftime('%Y/%m/%d %H:%M') }}</td>
+                                    <td>{{ attempt.score }}/{{ attempt.total_questions }}</td>
+                                    <td>
+                                        {% set percentage = (attempt.score / attempt.total_questions * 100)|round(2) %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar {% if percentage >= 70 %}bg-success{% elif percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ percentage }}%">
+                                                </div>
+                                            </div>
+                                            <span class="ms-2 {% if percentage >= 70 %}text-success{% elif percentage >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                                                {{ percentage }}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

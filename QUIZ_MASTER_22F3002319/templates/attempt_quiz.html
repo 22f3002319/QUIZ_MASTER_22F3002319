@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Attempt Quiz - Quiz Master{% endblock %}
+
+{% block content %}
+<div id="app" class="container-fluid">
+    <!-- Include User Navigation -->
+    {% include 'includes/user_nav.html' %}
+
+<div class="container mt-4">
+    <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ quiz.chapter.subject.name }} - {{ quiz.chapter.name }}</h5>
+                        <div id="quiz-timer" class="badge bg-warning text-dark fs-6">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="timer-display">{{ quiz.time_duration }} minutes</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="quiz-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            {% for question in quiz.questions %}
+                            <div class="question-container mb-4" data-question-id="{{ question.id }}">
+                                <h6 class="question-number">Question {{ loop.index }}</h6>
+                                <p class="question-text">{{ question.question_statement }}</p>
+                                <div class="options">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="option1" id="q{{ question.id }}_opt1">
+                                        <label class="form-check-label" for="q{{ question.id }}_opt1">
+                                            {{ question.option1 }}
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="option2" id="q{{ question.id }}_opt2">
+                                        <label class="form-check-label" for="q{{ question.id }}_opt2">
+                                            {{ question.option2 }}
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="option3" id="q{{ question.id }}_opt3">
+                                        <label class="form-check-label" for="q{{ question.id }}_opt3">
+                                            {{ question.option3 }}
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="option4" id="q{{ question.id }}_opt4">
+                                        <label class="form-check-label" for="q{{ question.id }}_opt4">
+                                            {{ question.option4 }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                    <i class="fas fa-arrow-left me-1"></i> Back
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submit-quiz">
+                                    <i class="fas fa-paper-plane me-1"></i> Submit Quiz
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                        <h6 class="mb-0">Quiz Progress</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="quiz-progress">
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" id="progress-bar"></div>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                <span id="answered-count">0</span> of {{ quiz.questions|length }} questions answered
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Question Navigator</h6>
+                </div>
+                <div class="card-body">
+                        <div class="row" id="question-nav">
+                        {% for question in quiz.questions %}
+                            <div class="col-3 mb-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm question-nav-btn" 
+                                        data-question="{{ loop.index }}" id="nav-{{ loop.index }}">
+                                    {{ loop.index }}
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            timeRemaining: {{ quiz.time_duration * 60 }}, // Convert minutes to seconds
+            timer: null,
+            answeredQuestions: new Set(),
+            totalQuestions: {{ quiz.questions|length }},
+            quizSubmitted: false
+        }
+    },
+    mounted() {
+        this.startTimer();
+        this.setupQuestionTracking();
+        this.setupQuestionNavigation();
+        this.updateProgress();
+        this.loadSavedAnswers();
+        
+        // Auto-save answers every 30 seconds
+        setInterval(() => {
+            this.saveAnswers();
+        }, 30000);
+        
+        // Warn before page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (!this.quizSubmitted) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('quiz-form').addEventListener('submit', (e) => {
+            this.quizSubmitted = true;
+            clearInterval(this.timer);
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submit-quiz');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Submitting...';
+        });
+    },
+    methods: {
+        startTimer() {
+            this.timer = setInterval(() => {
+                this.timeRemaining--;
+                this.updateTimerDisplay();
+                
+                if (this.timeRemaining <= 0) {
+                    this.submitQuiz();
+                } else if (this.timeRemaining <= 300) { // 5 minutes warning
+                    this.showTimeWarning();
+                }
+            }, 1000);
+        },
+        
+        updateTimerDisplay() {
+            const minutes = Math.floor(this.timeRemaining / 60);
+            const seconds = this.timeRemaining % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = display;
+            
+            // Change color based on time remaining
+            const timerElement = document.getElementById('quiz-timer');
+            if (this.timeRemaining <= 300) { // 5 minutes or less
+                timerElement.className = 'badge bg-danger text-white fs-6';
+            } else if (this.timeRemaining <= 600) { // 10 minutes or less
+                timerElement.className = 'badge bg-warning text-dark fs-6';
+            }
+        },
+        
+        showTimeWarning() {
+            if (this.timeRemaining === 300) { // Exactly 5 minutes
+                this.showNotification('Warning: Only 5 minutes remaining!', 'warning');
+            }
+        },
+        
+        setupQuestionTracking() {
+            const radioButtons = document.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const questionId = radio.name.replace('question_', '');
+                    this.answeredQuestions.add(questionId);
+                    this.updateProgress();
+                    this.updateQuestionNav();
+                });
+            });
+        },
+        
+        setupQuestionNavigation() {
+            const navButtons = document.querySelectorAll('.question-nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const questionNum = btn.dataset.question;
+                    this.scrollToQuestion(questionNum);
+                });
+            });
+        },
+        
+        scrollToQuestion(questionNum) {
+            const questionElement = document.querySelector(`[data-question-id]`);
+            if (questionElement) {
+                questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        },
+        
+        updateProgress() {
+            const progress = (this.answeredQuestions.size / this.totalQuestions) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('answered-count').textContent = this.answeredQuestions.size;
+        },
+        
+        updateQuestionNav() {
+            const navButtons = document.querySelectorAll('.question-nav-btn');
+            navButtons.forEach((btn, index) => {
+                const questionId = (index + 1).toString();
+                if (this.answeredQuestions.has(questionId)) {
+                    btn.className = 'btn btn-success btn-sm question-nav-btn';
+                } else {
+                    btn.className = 'btn btn-outline-primary btn-sm question-nav-btn';
+                }
+            });
+        },
+        
+        saveAnswers() {
+            // Save answers to localStorage for recovery
+            const answers = {};
+            const radioButtons = document.querySelectorAll('input[type="radio"]:checked');
+            radioButtons.forEach(radio => {
+                answers[radio.name] = radio.value;
+            });
+            localStorage.setItem('quiz_answers_{{ quiz.id }}', JSON.stringify(answers));
+        },
+        
+        loadSavedAnswers() {
+            const saved = localStorage.getItem('quiz_answers_{{ quiz.id }}');
+            if (saved) {
+                const answers = JSON.parse(saved);
+                Object.keys(answers).forEach(questionName => {
+                    const radio = document.querySelector(`input[name="${questionName}"][value="${answers[questionName]}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        const questionId = questionName.replace('question_', '');
+                        this.answeredQuestions.add(questionId);
+                    }
+                });
+                this.updateProgress();
+                this.updateQuestionNav();
+            }
+        },
+        
+        submitQuiz() {
+            this.quizSubmitted = true;
+            clearInterval(this.timer);
+            document.getElementById('quiz-form').submit();
+        },
+        
+        showNotification(message, type = 'info') {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    }
+}).mount('#app');
+</script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Reminder Settings - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Reminder Settings
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row">
+                            <!-- Daily Reminders Section -->
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-calendar-day me-2"></i>Daily Reminders
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-3">
+                                            {{ form.daily_reminders_enabled(class="form-check-input") }}
+                                            <label class="form-check-label" for="{{ form.daily_reminders_enabled.id }}">
+                                                Enable Daily Reminders
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="{{ form.daily_reminder_hour.id }}" class="form-label">Hour (0-23)</label>
+                                                {{ form.daily_reminder_hour(class="form-control", placeholder="18") }}
+                                                {% if form.daily_reminder_hour.errors %}
+                                                    <div class="text-danger small">
+                                                        {% for error in form.daily_reminder_hour.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="{{ form.daily_reminder_minute.id }}" class="form-label">Minute (0-59)</label>
+                                                {{ form.daily_reminder_minute(class="form-control", placeholder="0") }}
+                                                {% if form.daily_reminder_minute.errors %}
+                                                    <div class="text-danger small">
+                                                        {% for error in form.daily_reminder_minute.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Daily reminders will be sent at {{ form.daily_reminder_hour.data or 18 }}:{{ "%02d"|format(form.daily_reminder_minute.data or 0) }} every day
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Monthly Reminders Section -->
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-calendar-alt me-2"></i>Monthly Reminders
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-3">
+                                            {{ form.monthly_reminders_enabled(class="form-check-input") }}
+                                            <label class="form-check-label" for="{{ form.monthly_reminders_enabled.id }}">
+                                                Enable Monthly Reminders
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="{{ form.monthly_reminder_day.id }}" class="form-label">Day (1-31)</label>
+                                                {{ form.monthly_reminder_day(class="form-control", placeholder="1") }}
+                                                {% if form.monthly_reminder_day.errors %}
+                                                    <div class="text-danger small">
+                                                        {% for error in form.monthly_reminder_day.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="{{ form.monthly_reminder_hour.id }}" class="form-label">Hour (0-23)</label>
+                                                {{ form.monthly_reminder_hour(class="form-control", placeholder="9") }}
+                                                {% if form.monthly_reminder_hour.errors %}
+                                                    <div class="text-danger small">
+                                                        {% for error in form.monthly_reminder_hour.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="{{ form.monthly_reminder_minute.id }}" class="form-label">Minute (0-59)</label>
+                                                {{ form.monthly_reminder_minute(class="form-control", placeholder="0") }}
+                                                {% if form.monthly_reminder_minute.errors %}
+                                                    <div class="text-danger small">
+                                                        {% for error in form.monthly_reminder_minute.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Monthly reports will be sent on day {{ form.monthly_reminder_day.data or 1 }} at {{ form.monthly_reminder_hour.data or 9 }}:{{ "%02d"|format(form.monthly_reminder_minute.data or 0) }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Information Section -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-lightbulb me-2"></i>How Reminders Work</h6>
+                            <ul class="mb-0">
+                                <li><strong>Daily Reminders:</strong> Sent to users who haven't logged in for 3+ days, notifying them about new quizzes</li>
+                                <li><strong>Monthly Reports:</strong> Sent to all users with their quiz performance summary for the previous month</li>
+                                <li><strong>Time Zone:</strong> All times are in UTC. Consider your local timezone when setting schedules</li>
+                                <li><strong>Celery Beat:</strong> Make sure Celery Beat is running for scheduled tasks to work properly</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ form.submit.label }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-update the time display when form fields change
+document.addEventListener('DOMContentLoaded', function() {
+    const dailyHour = document.getElementById('{{ form.daily_reminder_hour.id }}');
+    const dailyMinute = document.getElementById('{{ form.daily_reminder_minute.id }}');
+    const monthlyDay = document.getElementById('{{ form.monthly_reminder_day.id }}');
+    const monthlyHour = document.getElementById('{{ form.monthly_reminder_hour.id }}');
+    const monthlyMinute = document.getElementById('{{ form.monthly_reminder_minute.id }}');
+    
+    function updateDailyTime() {
+        const hour = dailyHour.value || '18';
+        const minute = dailyMinute.value || '0';
+        const timeDisplay = dailyHour.parentElement.parentElement.querySelector('.text-muted');
+        timeDisplay.innerHTML = `<i class="fas fa-info-circle me-1"></i>Daily reminders will be sent at ${hour}:${minute.padStart(2, '0')} every day`;
+    }
+    
+    function updateMonthlyTime() {
+        const day = monthlyDay.value || '1';
+        const hour = monthlyHour.value || '9';
+        const minute = monthlyMinute.value || '0';
+        const timeDisplay = monthlyDay.parentElement.parentElement.querySelector('.text-muted');
+        timeDisplay.innerHTML = `<i class="fas fa-info-circle me-1"></i>Monthly reports will be sent on day ${day} at ${hour}:${minute.padStart(2, '0')}`;
+    }
+    
+    dailyHour.addEventListener('input', updateDailyTime);
+    dailyMinute.addEventListener('input', updateDailyTime);
+    monthlyDay.addEventListener('input', updateMonthlyTime);
+    monthlyHour.addEventListener('input', updateMonthlyTime);
+    monthlyMinute.addEventListener('input', updateMonthlyTime);
+});
+</script>
+{% endblock %} 

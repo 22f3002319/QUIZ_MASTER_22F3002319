@@ -1,0 +1,202 @@
+/* Dark Theme Variables */
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-card: #333333;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --accent-primary: #4CAF50;
+    --accent-secondary: #2196F3;
+    --danger: #f44336;
+    --warning: #ff9800;
+    --success: #4CAF50;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* Floating Background Effect */
+.floating-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(33, 150, 243, 0.05) 0%, transparent 40%);
+    animation: floatingBg 15s ease infinite;
+}
+
+@keyframes floatingBg {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* Card Styles */
+.card {
+    background-color: var(--bg-card);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Table Styles */
+.table {
+    color: var(--text-primary);
+}
+
+.table thead th {
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.table td {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation Styles */
+.navbar {
+    background-color: var(--bg-secondary) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: var(--text-primary);
+    position: relative;
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    transition: color 0.3s;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link.active {
+    color: var(--accent-primary);
+}
+
+.navbar-light .navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-primary);
+    transition: all 0.3s;
+    transform: translateX(-50%);
+}
+
+.navbar-light .navbar-nav .nav-link:hover::after,
+.navbar-light .navbar-nav .nav-link.active::after {
+    width: 100%;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.btn-primary:hover {
+    background-color: #43a047;
+    border-color: #43a047;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+/* Chart Styles */
+canvas {
+    background-color: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* Responsive Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Modal Styles */
+.modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Form Styles */
+.form-control {
+    background-color: var(--bg-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    background-color: var(--bg-primary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+} 

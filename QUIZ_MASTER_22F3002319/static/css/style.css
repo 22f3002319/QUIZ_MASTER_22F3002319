@@ -1,0 +1,94 @@
+/* Custom styles for Quiz Master */
+
+/* Note: Dark theme is handled by custom.css */
+/* This file contains additional component-specific styles */
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-card {
+    transition: transform 0.2s;
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-stats {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-container, .register-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.question-card {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.option-label {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.option-label:hover {
+    background-color: #e9ecef;
+}
+
+.search-box {
+    margin-bottom: 20px;
+}
+
+.admin-actions {
+    margin-bottom: 20px;
+}
+
+.btn-action {
+    margin-right: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .chart-container {
+        padding: 10px;
+    }
+} 
