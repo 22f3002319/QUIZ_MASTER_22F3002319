@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flask App",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "app.py",
+                "FLASK_ENV": "development"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload",
+                "--host=0.0.0.0",
+                "--port=5000"
+            ],
+            "jinja": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Celery Worker",
+            "type": "python",
+            "request": "launch",
+            "module": "celery",
+            "args": [
+                "-A",
+                "celery_app",
+                "worker",
+                "--loglevel=info"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Celery Beat",
+            "type": "python",
+            "request": "launch",
+            "module": "celery",
+            "args": [
+                "-A",
+                "celery_app",
+                "beat",
+                "--loglevel=info"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
